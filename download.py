@@ -90,5 +90,5 @@ if __name__ == '__main__':
         cv2.imwrite(im_path, cv2.resize(out_img, (128, 128)))
         i += 1
         print i
-        time.sleep(1)
+        time.sleep(0.1)
     out_file.close()
