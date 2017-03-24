@@ -21,6 +21,7 @@ def get_urls(query_string, desired_num):
         rsp = fapi.photos_search(api_key=FLICKR_PUBLIC,
                                 ispublic="1",
                                 media="photos",
+                                license="2",
                                 per_page="500",
                                 page='1',
                                 text=query_string,
@@ -42,11 +43,12 @@ def get_urls(query_string, desired_num):
                                     ispublic="1",
                                     media="photos",
                                     per_page="500",
+                                    license="2",
                                     page=str(i),
                                     sort="interestingness-desc",
                                     text=query_string,
                                     extras=extras)
-            time.sleep(1)
+            time.sleep(0.5)
             fapi.testFailure(rsp)
         except KeyboardInterrupt:
             print('Keyboard exception while querying for images, exiting\n')
