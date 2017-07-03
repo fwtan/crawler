@@ -5,13 +5,18 @@ import os, cv2, sys, string
 import math, time, socket, urllib
 from flickrapi2 import FlickrAPI
 from datetime import datetime
+import os.path as osp
 
 socket.setdefaulttimeout(30)
 
-FLICKR_PUBLIC = 'Your Flickr Key'
-FLICKR_SECRET = 'Your Flickr Secret Key'
+FLICKR_PUBLIC = 'XX'
+FLICKR_SECRET = 'XX'
 
 fapi = FlickrAPI(FLICKR_PUBLIC, FLICKR_SECRET)
+
+def maybe_create(dir_path):
+    if not osp.exists(dir_path):
+        os.makedirs(dir_path)
 
 def get_urls(query_string, desired_num):
     extras='url_m'
@@ -70,27 +75,33 @@ def get_urls(query_string, desired_num):
             break
     return urls
 
-if __name__ == '__main__':
-    urls = get_urls('cow on grass', 10000)
+def download_images(query_string, desired_num):
+    urls = get_urls(query_string, desired_num)
     urls = set(urls)
-    print len(urls)
+    print query_string, len(urls)
     #urls = list(urls)
 
-    out_file = open('urls.txt','w')
     i = 1
+    out_file = open('%s.txt'%query_string,'w')
     for item in urls:
         out_file.write('%06d  %s\n'%(i, item))
-        ext = os.path.splitext(os.path.basename(item))[-1]
-        raw_path = os.path.join('original_images', 'image%05d'%i + ext)
-        im_path  = os.path.join('images', 'image%05d.jpg'%i)
+        i += 1
+    out_file.close()
+
+    maybe_create(query_string)
+    maybe_create(osp.join(query_string, 'original_images'))
+
+    i = 1
+    for item in urls:
+        ext = osp.splitext(os.path.basename(item))[-1]
+        raw_path = osp.join(query_string, 'original_images', '%09d'%i + ext)
         urllib.urlretrieve(item, raw_path)
-        img = cv2.imread(raw_path, cv2.IMREAD_COLOR)
-        min_dim = np.minimum(img.shape[0], img.shape[1])
-        offset_x = 0.5 * (img.shape[1] - min_dim)
-        offset_y = 0.5 * (img.shape[0] - min_dim)
-        out_img  = img[int(offset_y):int(offset_y)+img.shape[0], int(offset_x):int(offset_x)+img.shape[1], :]
-        cv2.imwrite(im_path, cv2.resize(out_img, (128, 128)))
         i += 1
         print i
         time.sleep(0.1)
-    out_file.close()
+
+if __name__ == '__main__':
+    cates = ['room', 'classroom' 'dining room', 'kitchen', 'living room', 'bath room', 'bedroom', 'powder room', 'family room', 'sunroom', 'home theater', 'pantry', 'great room']
+    desired_num = 100000
+    for x in cates:
+        download_images(x, desired_num)
